@@ -37,6 +37,7 @@ Tech Stack
     Data Persistence: Browser localStorage (100% private & client-side)
 Quick Start
   Since the application is fully self-contained in a single HTML file, no node_modules or build step is required!
+
 Option 1: Local Setup
   Clone the repository:git clone https://github.com/your-username/outreach_dashboard.git
   Open app.html in any modern web browser (Chrome, Firefox, Safari, Edge).
