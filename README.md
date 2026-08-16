@@ -45,7 +45,7 @@ Option 1: Local Setup
 Option 2: Deploy to GitHub Pages
   Go to your repository Settings > Pages.
   Set the branch source to main (or master) and folder to / (root).
-  Save, and your CRM will be live at https://your-username.github.io/outreach_dashboard/app.html!
+  Save, and your CRM will be live at https://your-username.github.io/outreach_dashboard/index.html!
   
   Built-In Methodologies
     The 3B7 Follow-Up Rule
