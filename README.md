@@ -39,13 +39,13 @@ Quick Start
   Since the application is fully self-contained in a single HTML file, no node_modules or build step is required!
 
 Option 1: Local Setup
-  Clone the repository:git clone https://github.com/your-username/outreach_dashboard.git
+  Clone the repository:git clone https://github.com/your-username/ai_outreach_crm_kpi_dashboard.git
   Open app.html in any modern web browser (Chrome, Firefox, Safari, Edge).
 
 Option 2: Deploy to GitHub Pages
   Go to your repository Settings > Pages.
   Set the branch source to main (or master) and folder to / (root).
-  Save, and your CRM will be live at https://your-username.github.io/outreach_dashboard/index.html!
+  Save, and your CRM will be live at https://your-username.github.io/ai_outreach_crm_kpi_dashboard/index.html!
   
   Built-In Methodologies
     The 3B7 Follow-Up Rule
