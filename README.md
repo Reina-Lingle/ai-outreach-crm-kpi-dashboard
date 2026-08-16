@@ -54,3 +54,22 @@ Since the application is fully self-contained in a single HTML file, no `node_mo
 1. Clone the repository:
    ```bash
    git clone https://github.com/your-username/outreach_dashboard.git
+
+### Option 2: Deploy to GitHub Pages
+1. Go to your repository Settings>Pages.
+2. Set the branch source to main (or master) and folder to / (root).
+3. Save, and your CRM will be live at https//your-username.github.io/ai-outreach-crm-kpi-dashboard/app.html!
+
+## Built-In Methodologies
+* **Day +3 Business Days**: Send a short, low-friction reminder ("Quick follow-up...").
+* **Day +7 Business Days**: Pivot the angle or offer a value-add link, then gracefully archive to prevent inbox clutter.
+
+## The TIARA Informational Interview Framework
+1. **Trends**: Macro shifts in the AI/ML domain over the next 6-12 months.
+2. **Insights**: Non-obvious takeaways from scaling or deploying models.
+3. **Advice**: Specific skill sets or domain knowledge to prioritize.
+4. **Resources**: Essential research papers, repos, or benchmarks.
+5. **Assignments**: High-impact projects and secondary network connections.
+
+### License 
+Distributed under the MIT License. See LICENSE for more information.
