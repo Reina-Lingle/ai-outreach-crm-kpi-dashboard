@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Outreach CRM & Velocity Dashboard</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js for Campaign Velocity Visualizer -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f6ff',
+              100: '#e0edff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            },
+            ai: {
+              accent: '#6366f1',
+              glow: '#818cf8',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              rose: '#f43f5e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar for sleek UI */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .kanban-col {
+      min-height: calc(100vh - 220px);
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col font-sans antialiased text-slate-200 bg-slate-950">
+
+  <!-- Navigation Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Logo & Title -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-brand-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i class="fa-solid font-bold text-white text-lg fa-bolt-lightning"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white tracking-wide flex items-center gap-2">
+            AI Outreach CRM
+            <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">v1.0 Pro</span>
+          </h1>
+          <p class="text-xs text-slate-400">Informational Interview & Campaign Velocity Hub</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-white bg-indigo-600 transition">
+          <i class="fa-solid fa-gauge-high mr-1.5"></i> Dashboard & Action Hub
+        </button>
+        <button onclick="switchTab('pipeline')" id="nav-pipeline" class="nav-btn px-4 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-kanban mr-1.5"></i> Pipeline Kanban
+        </button>
+        <button onclick="switchTab('contacts')" id="nav-contacts" class="nav-btn px-4 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-address-book mr-1.5"></i> Contacts Directory
+        </button>
+        <button onclick="switchTab('templates')" id="nav-templates" class="nav-btn px-4 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-file-lines mr-1.5"></i> Message Templates
+        </button>
+        <button onclick="switchTab('tiara')" id="nav-tiara" class="nav-btn px-4 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-compass mr-1.5"></i> TIARA Framework
+        </button>
+      </nav>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center space-x-2">
+        <button onclick="openContactModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-md shadow-indigo-600/20 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-user-plus text-sm"></i>
+          <span>Add Contact</span>
+        </button>
+        <button onclick="resetMockData()" title="Reset to Sample Data" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-2.5 py-2 rounded-lg border border-slate-700 transition">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- Main Scrollable App Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ==================== TAB 1: DASHBOARD & ACTION HUB ==================== -->
+    <section id="tab-dashboard" class="tab-content space-y-6">
+
+      <!-- Top Section: Weekly Pace Gauges -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        
+        <!-- KPI Card 1: New Outreach Sent -->
+        <div class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Weekly Goal 1</span>
+              <h3 class="text-lg font-bold text-white mt-0.5">New Outreach Sent</h3>
+            </div>
+            <span class="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <i class="fa-solid fa-paper-plane text-lg"></i>
+            </span>
+          </div>
+          <div class="mt-4 flex items-baseline space-x-2">
+            <span id="kpi-outreach-val" class="text-3xl font-extrabold text-white">4</span>
+            <span class="text-sm font-semibold text-slate-400">/ 5 target</span>
+            <span id="kpi-outreach-status" class="ml-auto text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">
+              On Pace
+            </span>
+          </div>
+          <!-- Progress Bar -->
+          <div class="w-full bg-slate-800 rounded-full h-2.5 mt-3 overflow-hidden">
+            <div id="kpi-outreach-bar" class="bg-gradient-to-r from-indigo-500 to-blue-400 h-2.5 rounded-full" style="width: 80%"></div>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2 flex items-center justify-between">
+            <span>Target: 3 - 5 new messages / wk</span>
+            <span id="kpi-outreach-pct" class="font-semibold text-slate-300">80%</span>
+          </p>
+        </div>
+
+        <!-- KPI Card 2: Interviews Scheduled -->
+        <div class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Weekly Goal 2</span>
+              <h3 class="text-lg font-bold text-white mt-0.5">Interviews Scheduled</h3>
+            </div>
+            <span class="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <i class="fa-solid fa-calendar-check text-lg"></i>
+            </span>
+          </div>
+          <div class="mt-4 flex items-baseline space-x-2">
+            <span id="kpi-interviews-val" class="text-3xl font-extrabold text-white">2</span>
+            <span class="text-sm font-semibold text-slate-400">/ 3 target</span>
+            <span id="kpi-interviews-status" class="ml-auto text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-medium">
+              Needs 1 More
+            </span>
+          </div>
+          <!-- Progress Bar -->
+          <div class="w-full bg-slate-800 rounded-full h-2.5 mt-3 overflow-hidden">
+            <div id="kpi-interviews-bar" class="bg-gradient-to-r from-amber-500 to-yellow-400 h-2.5 rounded-full" style="width: 66%"></div>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2 flex items-center justify-between">
+            <span>Target: 1 - 3 scheduled / wk</span>
+            <span id="kpi-interviews-pct" class="font-semibold text-slate-300">66%</span>
+          </p>
+        </div>
+
+        <!-- KPI Card 3: Post-Interview Follow-up Rate -->
+        <div class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Weekly Goal 3</span>
+              <h3 class="text-lg font-bold text-white mt-0.5">Follow-up Completion</h3>
+            </div>
+            <span class="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <i class="fa-solid fa-circle-check text-lg"></i>
+            </span>
+          </div>
+          <div class="mt-4 flex items-baseline space-x-2">
+            <span id="kpi-followup-val" class="text-3xl font-extrabold text-white">100%</span>
+            <span class="text-sm font-semibold text-slate-400">scheduled</span>
+            <span class="ml-auto text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">
+              100% Standard
+            </span>
+          </div>
+          <!-- Progress Bar -->
+          <div class="w-full bg-slate-800 rounded-full h-2.5 mt-3 overflow-hidden">
+            <div id="kpi-followup-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2.5 rounded-full" style="width: 100%"></div>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2 flex items-center justify-between">
+            <span>Target: 100% completed &lt; 24h</span>
+            <span class="font-semibold text-emerald-400">Optimal</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Left 2 Columns: "Actions Required Today" Queue -->
+        <div class="lg:col-span-2 glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                Actions Required Today
+                <span id="action-queue-count" class="text-xs px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-semibold border border-rose-500/30">3 pending</span>
+              </h2>
+            </div>
+            <span class="text-xs text-slate-400 font-mono">3B7 Follow-up Engine Active</span>
+          </div>
+
+          <!-- Action Items Dynamic Container -->
+          <div id="action-queue-list" class="space-y-3">
+            <!-- Dynamic elements populated by JS renderDashboard() -->
+          </div>
+        </div>
+
+        <!-- Right Column: Campaign Velocity Visualizer Chart -->
+        <div class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h2 class="text-base font-bold text-white">Campaign Velocity</h2>
+              <span class="text-xs text-slate-400">Past 5 Weeks</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-4">Outreach vs. Interviews Scheduled trend line.</p>
+            <div class="h-48 relative">
+              <canvas id="velocityChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Conversion Funnel Summary -->
+          <div class="mt-4 pt-4 border-t border-slate-800 grid grid-cols-3 text-center gap-2">
+            <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-800/80">
+              <span class="text-[10px] uppercase text-slate-400 block font-semibold">Total Sent</span>
+              <span id="funnel-sent" class="text-sm font-bold text-white">18</span>
+            </div>
+            <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-800/80">
+              <span class="text-[10px] uppercase text-slate-400 block font-semibold">Replies</span>
+              <span id="funnel-replies" class="text-sm font-bold text-indigo-400">8 (44%)</span>
+            </div>
+            <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-800/80">
+              <span class="text-[10px] uppercase text-slate-400 block font-semibold">Booked</span>
+              <span id="funnel-booked" class="text-sm font-bold text-emerald-400">5 (28%)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 2: PIPELINE KANBAN BOARD ==================== -->
+    <section id="tab-pipeline" class="tab-content hidden space-y-4">
+      
+      <!-- Pipeline Header & Search Filter Bar -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/90 p-4 rounded-2xl border border-slate-800">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            Outreach Pipeline
+            <span class="text-xs font-normal text-slate-400">(Drag or click arrows to shift contacts)</span>
+          </h2>
+          <p class="text-xs text-slate-400">Monitors stage progression and applies automatic 3B7 business day rule logic.</p>
+        </div>
+
+        <div class="flex items-center space-x-3 w-full sm:w-auto">
+          <div class="relative flex-1 sm:w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-500"></i>
+            <input type="text" id="pipeline-search" oninput="renderPipeline()" placeholder="Search name, company, role..." class="w-full bg-slate-950 text-xs text-white pl-8 pr-3 py-2 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500">
+          </div>
+          <select id="pipeline-source-filter" onchange="renderPipeline()" class="bg-slate-950 text-xs text-slate-300 py-2 px-3 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">All Sources</option>
+            <option value="AI Innovators List">AI Innovators List</option>
+            <option value="Conference / Event">Conference / Event</option>
+            <option value="LinkedIn Cold">LinkedIn Cold</option>
+            <option value="Mutual Connection">Mutual Connection</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Kanban Columns Container -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 overflow-x-auto pb-4">
+        
+        <!-- Column 1: Identified -->
+        <div class="bg-slate-900/60 rounded-xl border border-slate-800/80 p-3 flex flex-col kanban-col min-w-[210px]">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-3">
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-slate-400"></span> 1. Identified
+            </span>
+            <span id="count-stage-IDENTIFIED" class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">0</span>
+          </div>
+          <div id="col-IDENTIFIED" class="flex-1 space-y-2.5" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'IDENTIFIED')"></div>
+        </div>
+
+        <!-- Column 2: Messaged -->
+        <div class="bg-slate-900/60 rounded-xl border border-slate-800/80 p-3 flex flex-col kanban-col min-w-[210px]">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-3">
+            <span class="text-xs font-bold text-blue-400 uppercase tracking-wide flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span> 2. Messaged
+            </span>
+            <span id="count-stage-MESSAGED" class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">0</span>
+          </div>
+          <div id="col-MESSAGED" class="flex-1 space-y-2.5" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'MESSAGED')"></div>
+        </div>
+
+        <!-- Column 3: Awaiting Reply -->
+        <div class="bg-slate-900/60 rounded-xl border border-slate-800/80 p-3 flex flex-col kanban-col min-w-[210px]">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-3">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-wide flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span> 3. Awaiting Reply
+            </span>
+            <span id="count-stage-AWAITING_REPLY" class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">0</span>
+          </div>
+          <div id="col-AWAITING_REPLY" class="flex-1 space-y-2.5" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'AWAITING_REPLY')"></div>
+        </div>
+
+        <!-- Column 4: Interview Scheduled -->
+        <div class="bg-slate-900/60 rounded-xl border border-slate-800/80 p-3 flex flex-col kanban-col min-w-[210px]">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-3">
+            <span class="text-xs font-bold text-indigo-400 uppercase tracking-wide flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-indigo-400"></span> 4. Scheduled
+            </span>
+            <span id="count-stage-INTERVIEW_SCHEDULED" class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">0</span>
+          </div>
+          <div id="col-INTERVIEW_SCHEDULED" class="flex-1 space-y-2.5" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'INTERVIEW_SCHEDULED')"></div>
+        </div>
+
+        <!-- Column 5: Follow-up Pending -->
+        <div class="bg-slate-900/60 rounded-xl border border-slate-800/80 p-3 flex flex-col kanban-col min-w-[210px]">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-3">
+            <span class="text-xs font-bold text-rose-400 uppercase tracking-wide flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-rose-400"></span> 5. Follow-up
+            </span>
+            <span id="count-stage-FOLLOWUP_PENDING" class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">0</span>
+          </div>
+          <div id="col-FOLLOWUP_PENDING" class="flex-1 space-y-2.5" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'FOLLOWUP_PENDING')"></div>
+        </div>
+
+        <!-- Column 6: Advocate / Nurture -->
+        <div class="bg-slate-900/60 rounded-xl border border-slate-800/80 p-3 flex flex-col kanban-col min-w-[210px]">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-3">
+            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> 6. Advocate
+            </span>
+            <span id="count-stage-ADVOCATE" class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">0</span>
+          </div>
+          <div id="col-ADVOCATE" class="flex-1 space-y-2.5" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'ADVOCATE')"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: CONTACTS DIRECTORY ==================== -->
+    <section id="tab-contacts" class="tab-content hidden space-y-4">
+      
+      <div class="glass-card rounded-2xl p-6 border border-slate-800">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <h2 class="text-lg font-bold text-white">Contacts Directory</h2>
+            <p class="text-xs text-slate-400">Comprehensive view of all identified target industry experts.</p>
+          </div>
+          <div class="flex items-center space-x-3 w-full sm:w-auto">
+            <input type="text" id="directory-search" oninput="renderDirectory()" placeholder="Filter contacts..." class="bg-slate-950 text-xs text-white px-3 py-2 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500 w-full sm:w-64">
+            <button onclick="openContactModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5 shrink-0">
+              <i class="fa-solid fa-plus"></i> New Contact
+            </button>
+          </div>
+        </div>
+
+        <!-- Directory Table -->
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                <th class="py-3 px-4">Contact</th>
+                <th class="py-3 px-4">Company & Role</th>
+                <th class="py-3 px-4">Current Stage</th>
+                <th class="py-3 px-4">Source</th>
+                <th class="py-3 px-4">3B7 Follow-up Status</th>
+                <th class="py-3 px-4">Last Active</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="directory-tbody" class="divide-y divide-slate-800/60 text-xs">
+              <!-- Dynamically rendered rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 4: MESSAGE TEMPLATES ==================== -->
+    <section id="tab-templates" class="tab-content hidden space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left Sidebar: Template Selection -->
+        <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-3">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2">Select Outreach Template</h3>
+          
+          <div class="space-y-2">
+            <button onclick="selectTemplate('initial')" id="tmpl-btn-initial" class="tmpl-select-btn w-full text-left p-3 rounded-xl border border-indigo-500/50 bg-indigo-500/10 text-white font-medium text-xs flex items-center justify-between">
+              <div>
+                <p class="font-bold text-indigo-300">Initial Outreach</p>
+                <p class="text-[11px] text-slate-400">Warm/Cold value-add request</p>
+              </div>
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+
+            <button onclick="selectTemplate('nudge')" id="tmpl-btn-nudge" class="tmpl-select-btn w-full text-left p-3 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-300 font-medium text-xs flex items-center justify-between hover:border-slate-700">
+              <div>
+                <p class="font-bold text-amber-300">3B7 Nudge (Day +3)</p>
+                <p class="text-[11px] text-slate-400">Low-friction short reminder</p>
+              </div>
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+
+            <button onclick="selectTemplate('pivot')" id="tmpl-btn-pivot" class="tmpl-select-btn w-full text-left p-3 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-300 font-medium text-xs flex items-center justify-between hover:border-slate-700">
+              <div>
+                <p class="font-bold text-rose-300">3B7 Pivot / Graceful Archive (Day +7)</p>
+                <p class="text-[11px] text-slate-400">Shift angle or close out</p>
+              </div>
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+
+            <button onclick="selectTemplate('thankyou')" id="tmpl-btn-thankyou" class="tmpl-select-btn w-full text-left p-3 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-300 font-medium text-xs flex items-center justify-between hover:border-slate-700">
+              <div>
+                <p class="font-bold text-emerald-300">Post-Interview Thank You (&lt;24h)</p>
+                <p class="text-[11px] text-slate-400">Key takeaway + value reciprocal link</p>
+              </div>
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+
+            <button onclick="selectTemplate('advocate')" id="tmpl-btn-advocate" class="tmpl-select-btn w-full text-left p-3 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-300 font-medium text-xs flex items-center justify-between hover:border-slate-700">
+              <div>
+                <p class="font-bold text-indigo-300">Monthly Advocate Touchpoint</p>
+                <p class="text-[11px] text-slate-400">Keep relationship warm long-term</p>
+              </div>
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right 2 Columns: Dynamic Variables & Output Generator -->
+        <div class="lg:col-span-2 glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+            <div>
+              <h3 id="template-title" class="text-base font-bold text-white">Initial Outreach Template</h3>
+              <p id="template-desc" class="text-xs text-slate-400">Personalized outreach focusing on curiosity and non-demanding informational chat.</p>
+            </div>
+            <button onclick="copyGeneratedTemplate()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition">
+              <i class="fa-regular fa-copy"></i>
+              <span>Copy to Clipboard</span>
+            </button>
+          </div>
+
+          <!-- Variable Filler Form -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Target Contact Name</label>
+              <input type="text" id="tmpl-var-name" oninput="updateTemplatePreview()" value="Dr. Aris Vance" class="w-full bg-slate-900 text-white px-2.5 py-1.5 rounded-lg border border-slate-800 focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Company / Lab</label>
+              <input type="text" id="tmpl-var-company" oninput="updateTemplatePreview()" value="Anthropic" class="w-full bg-slate-900 text-white px-2.5 py-1.5 rounded-lg border border-slate-800 focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Specific Research / Topic</label>
+              <input type="text" id="tmpl-var-topic" oninput="updateTemplatePreview()" value="mechanistic interpretability" class="w-full bg-slate-900 text-white px-2.5 py-1.5 rounded-lg border border-slate-800 focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+
+          <!-- Template Text Area Output -->
+          <div>
+            <label class="block text-xs font-bold text-slate-400 mb-2">Generated Message Preview:</label>
+            <textarea id="template-output" rows="10" class="w-full bg-slate-950 text-slate-200 p-4 rounded-xl border border-slate-800 font-mono text-xs leading-relaxed focus:outline-none focus:border-indigo-500"></textarea>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 5: TIARA FRAMEWORK ==================== -->
+    <section id="tab-tiara" class="tab-content hidden space-y-6">
+      
+      <div class="glass-card rounded-2xl p-6 border border-slate-800 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <span class="text-xs uppercase font-bold text-indigo-400 tracking-wider">Interview Playbook</span>
+            <h2 class="text-xl font-bold text-white mt-0.5">The TIARA Framework for 20-Min Informational Interviews</h2>
+            <p class="text-xs text-slate-400 mt-1">Structure your conversations naturally to gather authentic insights without putting contacts on the defensive.</p>
+          </div>
+          <span class="px-3 py-1 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono text-xs font-bold">
+            20-Minute Protocol
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+          
+          <!-- T: Trends -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center space-x-2">
+              <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">T</span>
+              <h3 class="text-sm font-bold text-white">Trends</h3>
+            </div>
+            <p class="text-[11px] text-slate-400">Explore macro shifts in the AI ecosystem.</p>
+            <div class="text-xs text-slate-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800/80 space-y-1 font-sans">
+              <p class="font-semibold text-indigo-300">Key Prompt:</p>
+              <p class="italic text-[11px]">"What trends are currently impacting your team's research focus over the next 6-12 months?"</p>
+            </div>
+          </div>
+
+          <!-- I: Insights -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center space-x-2">
+              <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">I</span>
+              <h3 class="text-sm font-bold text-white">Insights</h3>
+            </div>
+            <p class="text-[11px] text-slate-400">Uncover non-obvious day-to-day realities.</p>
+            <div class="text-xs text-slate-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800/80 space-y-1 font-sans">
+              <p class="font-semibold text-indigo-300">Key Prompt:</p>
+              <p class="italic text-[11px]">"What surprised you most when scaling models in your current group compared to academia?"</p>
+            </div>
+          </div>
+
+          <!-- A: Advice -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center space-x-2">
+              <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">A</span>
+              <h3 class="text-sm font-bold text-white">Advice</h3>
+            </div>
+            <p class="text-[11px] text-slate-400">Get specific, actionable career guidance.</p>
+            <div class="text-xs text-slate-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800/80 space-y-1 font-sans">
+              <p class="font-semibold text-indigo-300">Key Prompt:</p>
+              <p class="italic text-[11px]">"If you were focusing on this domain today, what core skillset would you prioritize first?"</p>
+            </div>
+          </div>
+
+          <!-- R: Resources -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center space-x-2">
+              <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">R</span>
+              <h3 class="text-sm font-bold text-white">Resources</h3>
+            </div>
+            <p class="text-[11px] text-slate-400">Discover papers, repos, and groups.</p>
+            <div class="text-xs text-slate-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800/80 space-y-1 font-sans">
+              <p class="font-semibold text-indigo-300">Key Prompt:</p>
+              <p class="italic text-[11px]">"What recent paper or open-source repo has been mandatory reading inside your engineering group?"</p>
+            </div>
+          </div>
+
+          <!-- A: Assignments -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center space-x-2">
+              <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">A</span>
+              <h3 class="text-sm font-bold text-white">Assignments</h3>
+            </div>
+            <p class="text-[11px] text-slate-400">Identify key projects & peer intros.</p>
+            <div class="text-xs text-slate-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800/80 space-y-1 font-sans">
+              <p class="font-semibold text-indigo-300">Key Prompt:</p>
+              <p class="italic text-[11px]">"Who else on your team or broader network is working closely on these evaluation benchmarks?"</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Best Practices Checklist -->
+        <div class="bg-slate-950 p-5 rounded-xl border border-slate-800">
+          <h4 class="text-sm font-bold text-white mb-3">Post-Interview Follow-Up Rules:</h4>
+          <ul class="text-xs text-slate-300 space-y-2 list-disc pl-5">
+            <li><strong>24-Hour Rule:</strong> Always send a personalized thank-you note within 24 hours explicitly mentioning one key takeaway from their advice.</li>
+            <li><strong>Value Reciprocity:</strong> Attach a relevant paper link, technical blog, or github project related to something discussed.</li>
+            <li><strong>Transition to Advocate:</strong> Move contact stage to "Advocate / Nurture" and schedule a monthly/bi-monthly gentle update ping.</li>
+          </ul>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal 1: Add/Edit Contact -->
+  <div id="contact-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center hidden p-4">
+    <div class="glass-card w-full max-w-xl rounded-2xl border border-slate-800 p-6 space-y-5 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 id="contact-modal-title" class="text-base font-bold text-white">Add New Target Contact</h3>
+        <button onclick="closeContactModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="contact-form" onsubmit="handleSaveContact(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="form-contact-id">
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1 font-medium">Full Name *</label>
+            <input type="text" id="form-name" required placeholder="e.g. Dr. Alex Rivera" class="w-full bg-slate-950 text-white p-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1 font-medium">Company / Organization *</label>
+            <input type="text" id="form-company" required placeholder="e.g. OpenAI" class="w-full bg-slate-950 text-white p-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1 font-medium">Role Title *</label>
+            <input type="text" id="form-role" required placeholder="e.g. Staff Research Scientist" class="w-full bg-slate-950 text-white p-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1 font-medium">LinkedIn URL</label>
+            <input type="url" id="form-linkedin" placeholder="https://linkedin.in/in/username" class="w-full bg-slate-950 text-white p-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1 font-medium">Pipeline Stage</label>
+            <select id="form-stage" class="w-full bg-slate-950 text-white p-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500">
+              <option value="IDENTIFIED">1. Identified</option>
+              <option value="MESSAGED">2. Messaged</option>
+              <option value="AWAITING_REPLY">3. Awaiting Reply</option>
+              <option value="INTERVIEW_SCHEDULED">4. Interview Scheduled</option>
+              <option value="FOLLOWUP_PENDING">5. Follow-up Pending</option>
+              <option value="ADVOCATE">6. Advocate / Nurture</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1 font-medium">Lead Source</label>
+            <select id="form-source" class="w-full bg-slate-950 text-white p-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500">
+              <option value="AI Innovators List">AI Innovators List</option>
+              <option value="Conference / Event">Conference / Event</option>
+              <option value="LinkedIn Cold">LinkedIn Cold</option>
+              <option value="Mutual Connection">Mutual Connection</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1 font-medium">Background Research / Notes</label>
+          <textarea id="form-notes" rows="3" placeholder="Key papers published, common interests, mutual contacts..." class="w-full bg-slate-950 text-white p-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-2">
+          <button type="button" onclick="closeContactModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 shadow-md shadow-indigo-600/20">Save Contact</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Contact Detail & Interaction Drawer -->
+  <div id="detail-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center hidden p-4">
+    <div class="glass-card w-full max-w-3xl rounded-2xl border border-slate-800 p-6 space-y-5 max-h-[90vh] overflow-y-auto relative">
+      <div class="flex justify-between items-start border-b border-slate-800 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 id="detail-name" class="text-xl font-bold text-white">Contact Name</h2>
+            <a id="detail-linkedin" href="#" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-sm"><i class="fa-brands fa-linkedin"></i></a>
+          </div>
+          <p id="detail-role-company" class="text-xs text-slate-400 mt-0.5">Role @ Company</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="editCurrentContact()" class="bg-slate-800 text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-700"><i class="fa-solid fa-pen mr-1"></i> Edit</button>
+          <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white text-lg px-2"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <!-- Detail Body Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+        
+        <!-- Left 1 Col: Quick Specs & Stage Stepper -->
+        <div class="space-y-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <div>
+            <span class="text-[10px] text-slate-500 uppercase font-bold">Current Stage</span>
+            <div id="detail-stage-badge" class="mt-1"></div>
+          </div>
+
+          <div>
+            <span class="text-[10px] text-slate-500 uppercase font-bold">3B7 Follow-up Engine</span>
+            <div id="detail-3b7-status" class="mt-1"></div>
+          </div>
+
+          <div>
+            <span class="text-[10px] text-slate-500 uppercase font-bold">Source Tag</span>
+            <p id="detail-source" class="text-slate-300 font-medium mt-0.5">Source</p>
+          </div>
+
+          <div>
+            <span class="text-[10px] text-slate-500 uppercase font-bold">Last Active Date</span>
+            <p id="detail-last-contact" class="text-slate-300 font-mono mt-0.5">YYYY-MM-DD</p>
+          </div>
+
+          <!-- Stage Transition Quick Select -->
+          <div class="pt-2 border-t border-slate-800">
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Advance Stage:</label>
+            <select id="detail-stage-select" onchange="updateContactStageFromModal()" class="w-full bg-slate-900 text-xs text-white p-2 rounded-lg border border-slate-800">
+              <option value="IDENTIFIED">1. Identified</option>
+              <option value="MESSAGED">2. Messaged</option>
+              <option value="AWAITING_REPLY">3. Awaiting Reply</option>
+              <option value="INTERVIEW_SCHEDULED">4. Interview Scheduled</option>
+              <option value="FOLLOWUP_PENDING">5. Follow-up Pending</option>
+              <option value="ADVOCATE">6. Advocate / Nurture</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Right 2 Cols: Interaction Logs & TIARA Notes -->
+        <div class="md:col-span-2 space-y-4">
+          
+          <!-- Research Notes -->
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <h4 class="text-xs font-bold text-white mb-1">Background Research & Context:</h4>
+            <p id="detail-notes" class="text-slate-300 leading-relaxed whitespace-pre-line"></p>
+          </div>
+
+          <!-- Interaction Log History -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <h4 class="text-xs font-bold text-white">Interaction History</h4>
+              <button onclick="toggleLogForm()" class="text-[11px] text-indigo-400 hover:underline"><i class="fa-solid fa-plus mr-1"></i> Log Activity</button>
+            </div>
+
+            <!-- New Interaction Log Input Form -->
+            <div id="log-form-container" class="hidden bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-2">
+              <div class="grid grid-cols-2 gap-2">
+                <select id="log-type" class="bg-slate-950 text-white p-1.5 rounded-lg text-xs border border-slate-800">
+                  <option value="INITIAL_OUTREACH">Initial Outreach</option>
+                  <option value="NUDGE">3B7 Nudge</option>
+                  <option value="PIVOT">3B7 Pivot</option>
+                  <option value="INTERVIEW">Informational Interview</option>
+                  <option value="THANK_YOU">Thank You Note</option>
+                  <option value="CHECK_IN">Advocate Check-In</option>
+                </select>
+                <input type="date" id="log-date" class="bg-slate-950 text-white p-1.5 rounded-lg text-xs border border-slate-800">
+              </div>
+              <textarea id="log-content" rows="2" placeholder="Summary of interaction or meeting key takeaway..." class="w-full bg-slate-950 text-white p-2 rounded-lg text-xs border border-slate-800"></textarea>
+              <div class="flex justify-end space-x-2">
+                <button onclick="toggleLogForm()" class="px-2.5 py-1 text-[11px] bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+                <button onclick="saveInteractionLog()" class="px-3 py-1 text-[11px] bg-indigo-600 text-white font-semibold rounded-lg">Save Log</button>
+              </div>
+            </div>
+
+            <!-- Log Timeline Output -->
+            <div id="detail-logs-timeline" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       APPLICATION STATE & MOCK DATA STORAGE
+       ========================================================================== */
+
+    const INITIAL_MOCK_CONTACTS = [
+      {
+        id: "c1",
+        name: "Dr. Elena Rostova",
+        company: "OpenAI",
+        role: "Staff Alignment Researcher",
+        linkedin: "https://linkedin.com",
+        source: "AI Innovators List",
+        stage: "AWAITING_REPLY",
+        lastContactDate: getRelativeDate(-4), // 4 calendar days ago
+        notes: "Co-authored landmark paper on RLHF interpretability. Expressed interest in governance benchmark models.",
+        logs: [
+          { type: "INITIAL_OUTREACH", date: getRelativeDate(-4), summary: "Sent personalized initial outreach inquiring about alignment benchmark trends." }
+        ]
+      },
+      {
+        id: "c2",
+        name: "Marcus Vance",
+        company: "Anthropic",
+        role: "Lead Systems Architect",
+        linkedin: "https://linkedin.com",
+        source: "Conference / Event",
+        stage: "INTERVIEW_SCHEDULED",
+        lastContactDate: getRelativeDate(-1),
+        notes: "Met briefly at NeurIPS panel. Interested in hardware acceleration scaling efficiency.",
+        logs: [
+          { type: "INITIAL_OUTREACH", date: getRelativeDate(-5), summary: "Followed up on NeurIPS panel discussion." },
+          { type: "INTERVIEW", date: getRelativeDate(-1), summary: "Confirmed 20-min Zoom call for Thursday 2 PM EST." }
+        ]
+      },
+      {
+        id: "c3",
+        name: "Siddharth Nair",
+        company: "Google DeepMind",
+        role: "Senior AI Scientist",
+        linkedin: "https://linkedin.com",
+        source: "Mutual Connection",
+        stage: "FOLLOWUP_PENDING",
+        lastContactDate: getRelativeDate(0), // Today
+        notes: "Completed 20-min call today. Discussed multimodal agent architectures and evaluation loops. Need to send thank you note & share arXiv paper.",
+        logs: [
+          { type: "INITIAL_OUTREACH", date: getRelativeDate(-10), summary: "Intro through Sarah." },
+          { type: "INTERVIEW", date: getRelativeDate(0), summary: "Completed 20-min TIARA interview. Recommended reading 'Gemini 1.5 Pro Tech Report'." }
+        ]
+      },
+      {
+        id: "c4",
+        name: "Dr. Chloe Zhang",
+        company: "Meta AI (FAIR)",
+        role: "Research Director",
+        linkedin: "https://linkedin.com",
+        source: "AI Innovators List",
+        stage: "AWAITING_REPLY",
+        lastContactDate: getRelativeDate(-8), // 8 days ago -> OVERDUE 3B7 Pivot
+        notes: "Key focus on open-source LLM quantization and memory optimization.",
+        logs: [
+          { type: "INITIAL_OUTREACH", date: getRelativeDate(-8), summary: "Sent email regarding open-source compute benchmarks." }
+        ]
+      },
+      {
+        id: "c5",
+        name: "Julien Dubuis",
+        company: "Hugging Face",
+        role: "Head of Open Models",
+        linkedin: "https://linkedin.com",
+        source: "LinkedIn Cold",
+        stage: "ADVOCATE",
+        lastContactDate: getRelativeDate(-14),
+        notes: "Great champion. Scheduled monthly touchpoint to exchange ecosystem insights.",
+        logs: [
+          { type: "THANK_YOU", date: getRelativeDate(-14), summary: "Sent thank you note after call. Added to monthly advocate list." }
+        ]
+      },
+      {
+        id: "c6",
+        name: "Samantha Miller",
+        company: "Mistral AI",
+        role: "Product Lead - Enterprise",
+        linkedin: "https://linkedin.com",
+        source: "AI Innovators List",
+        stage: "IDENTIFIED",
+        lastContactDate: getRelativeDate(-2),
+        notes: "Building enterprise inference APIs. Researching their latency optimization approaches.",
+        logs: []
+      }
+    ];
+
+    const TEMPLATES = {
+      initial: {
+        title: "Initial Outreach (AI Innovator / Peer)",
+        desc: "Low-friction, curiosity-driven request focusing on their recent work rather than asking for a job.",
+        body: `Hi {NAME},
+
+I’ve been following your recent work at {COMPANY}, particularly around {TOPIC}. Your insights in this space have been immensely valuable as I study emerging trends across the AI ecosystem.
+
+I’m currently conducting brief conversations with a select group of technical leaders to understand how teams are navigating scaling challenges over the next 6–12 months. 
+
+Would you be open to a quick 15–20 minute informational chat over Zoom in the coming weeks? I’d love to learn about your perspective—no pitch, just a focused conversation on industry trends.
+
+Best regards,
+[Your Name]`
+      },
+      nudge: {
+        title: "3B7 Low-Friction Nudge (Day +3)",
+        desc: "Short, polite follow-up sent after 3 business days of no reply.",
+        body: `Hi {NAME},
+
+Quick follow-up on my note below—I know how busy things are with your team at {COMPANY}.
+
+I'd still love to get your quick 10-minute perspective on {TOPIC} if you have any bandwidth next week. If not, no worries at all!
+
+Best,
+[Your Name]`
+      },
+      pivot: {
+        title: "3B7 Pivot / Graceful Closure (Day +7)",
+        desc: "Sent after 7 business days to offer a resource and gracefully close the loop.",
+        body: `Hi {NAME},
+
+I know you’re likely in the thick of major milestones at {COMPANY}. I’ll close the loop on this for now so I don’t clutter your inbox.
+
+In case it’s useful for your team, I recently came across this research note on {TOPIC} that aligned closely with your public work: [Insert Link]
+
+Wishing you and the team all the best!
+
+Best,
+[Your Name]`
+      },
+      thankyou: {
+        title: "Post-Interview Thank You (< 24 Hours)",
+        desc: "Essential follow-up reinforcing a key takeaway and providing value.",
+        body: `Hi {NAME},
+
+Thank you so much for taking the time to speak with me today! Your insights on {TOPIC} at {COMPANY} were tremendously helpful.
+
+I especially appreciated your point regarding [Mention Specific Takeaway From Meeting]. As promised, here is the link to the paper/repo we discussed: [Insert Link].
+
+I’ll keep you updated as my research progresses. Please let me know if I can ever be a resource to you or your team!
+
+Warmly,
+[Your Name]`
+      },
+      advocate: {
+        title: "Monthly Advocate Touchpoint",
+        desc: "Nurturing ongoing relationships with contacts who provided great advice.",
+        body: `Hi {NAME},
+
+Hope you’re having a great week! 
+
+I came across this new paper on {TOPIC} today and immediately thought of our conversation about {COMPANY}'s roadmap.
+
+Hope all is going well with your research! Would love to catch up for 10 minutes sometime next month if you’re free.
+
+Best,
+[Your Name]`
+      }
+    };
+
+    // Global Active State
+    let contacts = [];
+    let activeTab = 'dashboard';
+    let activeDetailContactId = null;
+    let selectedTemplateKey = 'initial';
+    let velocityChartInstance = null;
+
+    /* ==========================================================================
+       DATE HELPERS & 3B7 RULE CALCULATOR
+       ========================================================================== */
+
+    function getRelativeDate(offsetDays) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      return d.toISOString().split('T')[0];
+    }
+
+    // Calculates elapsed business days (excluding Saturdays and Sundays)
+    function calculateBusinessDaysElapsed(startDateStr) {
+      const start = new Date(startDateStr);
+      const now = new Date();
+      let count = 0;
+      let cur = new Date(start);
+
+      cur.setDate(cur.getDate() + 1); // start counting next day
+      while (cur <= now) {
+        const dayOfWeek = cur.getDay();
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Not Sunday (0) or Saturday (6)
+          count++;
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+      return count;
+    }
+
+    // Determines 3B7 status object
+    function get3B7Status(contact) {
+      if (contact.stage !== 'AWAITING_REPLY' && contact.stage !== 'MESSAGED') {
+        return { label: 'Active Pipeline', color: 'text-slate-400', bg: 'bg-slate-800', type: 'NORMAL' };
+      }
+
+      const bDays = calculateBusinessDaysElapsed(contact.lastContactDate);
+
+      if (bDays < 3) {
+        return { label: `${bDays}/3 B-Days (Awaiting)`, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/30', type: 'WAITING' };
+      } else if (bDays >= 3 && bDays < 7) {
+        return { label: `${bDays} B-Days: Send Nudge!`, color: 'text-amber-400', bg: 'bg-amber-500/20 border-amber-500/40 animate-pulse', type: 'NUDGE_DUE' };
+      } else {
+        return { label: `${bDays} B-Days: Send Pivot / Archive`, color: 'text-rose-400', bg: 'bg-rose-500/20 border-rose-500/40 animate-pulse', type: 'PIVOT_DUE' };
+      }
+    }
+
+    /* ==========================================================================
+       APP INITIALIZATION & PERSISTENCE
+       ========================================================================== */
+
+    window.onload = function() {
+      loadContacts();
+      initVelocityChart();
+      renderApp();
+    };
+
+    function loadContacts() {
+      const saved = localStorage.getItem('ai_outreach_contacts_v1');
+      if (saved) {
+        try {
+          contacts = JSON.parse(saved);
+        } catch(e) {
+          contacts = [...INITIAL_MOCK_CONTACTS];
+        }
+      } else {
+        contacts = [...INITIAL_MOCK_CONTACTS];
+        saveContacts();
+      }
+    }
+
+    function saveContacts() {
+      localStorage.setItem('ai_outreach_contacts_v1', JSON.stringify(contacts));
+      renderApp();
+    }
+
+    function resetMockData() {
+      contacts = JSON.parse(JSON.stringify(INITIAL_MOCK_CONTACTS));
+      saveContacts();
+      showToast('Reset to original sample dataset', 'info');
+    }
+
+    function renderApp() {
+      renderDashboard();
+      renderPipeline();
+      renderDirectory();
+      updateTemplatePreview();
+    }
+
+    /* ==========================================================================
+       TAB NAVIGATION LOGIC
+       ========================================================================== */
+
+    function switchTab(tabId) {
+      activeTab = tabId;
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white');
+        btn.classList.add('text-slate-400');
+      });
+
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.add('bg-indigo-600', 'text-white');
+        activeNav.classList.remove('text-slate-400');
+      }
+
+      if (tabId === 'dashboard' && velocityChartInstance) {
+        velocityChartInstance.update();
+      }
+    }
+
+    /* ==========================================================================
+       DASHBOARD & KPI ENGINE
+       ========================================================================== */
+
+    function renderDashboard() {
+      // 1. Calculate KPIs
+      const messagedCount = contacts.filter(c => c.stage !== 'IDENTIFIED').length;
+      const scheduledCount = contacts.filter(c => c.stage === 'INTERVIEW_SCHEDULED' || c.stage === 'FOLLOWUP_PENDING' || c.stage === 'ADVOCATE').length;
+      const followUpPendingCount = contacts.filter(c => c.stage === 'FOLLOWUP_PENDING').length;
+      const totalInterviews = contacts.filter(c => c.stage === 'FOLLOWUP_PENDING' || c.stage === 'ADVOCATE').length;
+      
+      // Update KPI Gauges
+      document.getElementById('kpi-outreach-val').innerText = messagedCount;
+      const outreachPct = Math.min(100, Math.round((messagedCount / 5) * 100));
+      document.getElementById('kpi-outreach-bar').style.width = `${outreachPct}%`;
+      document.getElementById('kpi-outreach-pct').innerText = `${outreachPct}%`;
+
+      document.getElementById('kpi-interviews-val').innerText = scheduledCount;
+      const scheduledPct = Math.min(100, Math.round((scheduledCount / 3) * 100));
+      document.getElementById('kpi-interviews-bar').style.width = `${scheduledPct}%`;
+      document.getElementById('kpi-interviews-pct').innerText = `${scheduledPct}%`;
+
+      // 2. Actions Required Today Queue
+      const queueList = document.getElementById('action-queue-list');
+      queueList.innerHTML = '';
+      let pendingActionCount = 0;
+
+      contacts.forEach(contact => {
+        const status = get3B7Status(contact);
+
+        // Scenario A: Follow-up Pending (Post Interview Thank You)
+        if (contact.stage === 'FOLLOWUP_PENDING') {
+          pendingActionCount++;
+          queueList.innerHTML += `
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-rose-500/30 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <span class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-envelope-open-text"></i></span>
+                <div>
+                  <h4 class="text-xs font-bold text-white">${contact.name} (${contact.company})</h4>
+                  <p class="text-[11px] text-slate-400">Completed interview today — Send thank-you note within 24h.</p>
+                </div>
+              </div>
+              <button onclick="launchTemplateForContact('${contact.id}', 'thankyou')" class="bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg shadow">
+                Launch Thank-You
+              </button>
+            </div>
+          `;
+        }
+
+        // Scenario B: Overdue 3B7 Nudge
+        else if (status.type === 'NUDGE_DUE') {
+          pendingActionCount++;
+          queueList.innerHTML += `
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-amber-500/30 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <span class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-bell"></i></span>
+                <div>
+                  <h4 class="text-xs font-bold text-white">${contact.name} (${contact.company})</h4>
+                  <p class="text-[11px] text-slate-400">Awaiting reply for >3 business days (${calculateBusinessDaysElapsed(contact.lastContactDate)} days elapsed).</p>
+                </div>
+              </div>
+              <button onclick="launchTemplateForContact('${contact.id}', 'nudge')" class="bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg shadow">
+                Send 3B7 Nudge
+              </button>
+            </div>
+          `;
+        }
+
+        // Scenario C: Overdue 3B7 Pivot / Archive
+        else if (status.type === 'PIVOT_DUE') {
+          pendingActionCount++;
+          queueList.innerHTML += `
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-rose-500/30 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <span class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-route"></i></span>
+                <div>
+                  <h4 class="text-xs font-bold text-white">${contact.name} (${contact.company})</h4>
+                  <p class="text-[11px] text-slate-400">Awaiting reply for >7 business days. Send pivot or close out.</p>
+                </div>
+              </div>
+              <button onclick="launchTemplateForContact('${contact.id}', 'pivot')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold px-3 py-1.5 rounded-lg border border-slate-700">
+                Send Pivot Angle
+              </button>
+            </div>
+          `;
+        }
+      });
+
+      if (pendingActionCount === 0) {
+        queueList.innerHTML = `
+          <div class="p-6 text-center text-slate-400 text-xs bg-slate-900/40 rounded-xl border border-slate-800/80">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-xl mb-2"></i>
+            <p class="font-semibold text-slate-300">All actions caught up!</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">No overdue 3B7 nudges or pending thank-you notes.</p>
+          </div>
+        `;
+      }
+
+      document.getElementById('action-queue-count').innerText = `${pendingActionCount} pending`;
+    }
+
+    /* ==========================================================================
+       KANBAN PIPELINE ENGINE
+       ========================================================================== */
+
+    function renderPipeline() {
+      const stages = ['IDENTIFIED', 'MESSAGED', 'AWAITING_REPLY', 'INTERVIEW_SCHEDULED', 'FOLLOWUP_PENDING', 'ADVOCATE'];
+      const searchQuery = (document.getElementById('pipeline-search')?.value || '').toLowerCase();
+      const sourceFilter = document.getElementById('pipeline-source-filter')?.value || 'ALL';
+
+      stages.forEach(stage => {
+        const colEl = document.getElementById(`col-${stage}`);
+        const countEl = document.getElementById(`count-stage-${stage}`);
+        if (!colEl) return;
+
+        colEl.innerHTML = '';
+        
+        const filtered = contacts.filter(c => {
+          const matchStage = c.stage === stage;
+          const matchSearch = c.name.toLowerCase().includes(searchQuery) || c.company.toLowerCase().includes(searchQuery) || c.role.toLowerCase().includes(searchQuery);
+          const matchSource = sourceFilter === 'ALL' || c.source === sourceFilter;
+          return matchStage && matchSearch && matchSource;
+        });
+
+        countEl.innerText = filtered.length;
+
+        filtered.forEach(contact => {
+          const status3b7 = get3B7Status(contact);
+
+          colEl.innerHTML += `
+            <div draggable="true" ondragstart="handleDragStart(event, '${contact.id}')" onclick="openDetailModal('${contact.id}')" class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 hover:border-indigo-500/50 shadow-md cursor-pointer transition space-y-2 group">
+              <div class="flex justify-between items-start">
+                <h4 class="text-xs font-bold text-white group-hover:text-indigo-300 transition">${contact.name}</h4>
+                <span class="text-[10px] text-slate-500 font-mono">${contact.lastContactDate.substring(5)}</span>
+              </div>
+              
+              <p class="text-[11px] text-slate-400 font-medium leading-tight">${contact.role} <span class="text-slate-300">@ ${contact.company}</span></p>
+
+              ${contact.stage === 'AWAITING_REPLY' || contact.stage === 'MESSAGED' ? `
+                <div class="text-[10px] px-2 py-0.5 rounded-md border font-semibold inline-block ${status3b7.bg} ${status3b7.color}">
+                  ${status3b7.label}
+                </div>
+              ` : ''}
+
+              <div class="flex justify-between items-center pt-2 border-t border-slate-900 text-[10px] text-slate-500">
+                <span class="bg-slate-900 px-2 py-0.5 rounded text-slate-400 font-medium">${contact.source}</span>
+                <i class="fa-solid fa-chevron-right text-slate-600 group-hover:text-indigo-400"></i>
+              </div>
+            </div>
+          `;
+        });
+      });
+    }
+
+    // Drag and Drop Handlers
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    function handleDragStart(ev, contactId) {
+      ev.dataTransfer.setData("text/plain", contactId);
+    }
+
+    function handleDrop(ev, newStage) {
+      ev.preventDefault();
+      const contactId = ev.dataTransfer.getData("text/plain");
+      const contact = contacts.find(c => c.id === contactId);
+      if (contact && contact.stage !== newStage) {
+        contact.stage = newStage;
+        contact.lastContactDate = getRelativeDate(0);
+        saveContacts();
+        showToast(`Moved ${contact.name} to ${newStage.replace('_', ' ')}`, 'success');
+      }
+    }
+
+    /* ==========================================================================
+       DIRECTORY TABLE RENDERER
+       ========================================================================== */
+
+    function renderDirectory() {
+      const tbody = document.getElementById('directory-tbody');
+      if (!tbody) return;
+
+      const query = (document.getElementById('directory-search')?.value || '').toLowerCase();
+      tbody.innerHTML = '';
+
+      const filtered = contacts.filter(c => 
+        c.name.toLowerCase().includes(query) ||
+        c.company.toLowerCase().includes(query) ||
+        c.role.toLowerCase().includes(query)
+      );
+
+      filtered.forEach(c => {
+        const status = get3B7Status(c);
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-900/50 transition">
+            <td class="py-3 px-4 font-bold text-white">${c.name}</td>
+            <td class="py-3 px-4 text-slate-300">${c.role} <span class="text-slate-500">at</span> <span class="font-semibold text-slate-200">${c.company}</span></td>
+            <td class="py-3 px-4">
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-indigo-300 border border-slate-700">
+                ${c.stage.replace('_', ' ')}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-slate-400">${c.source}</td>
+            <td class="py-3 px-4">
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded border ${status.bg} ${status.color}">
+                ${status.label}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-slate-400 font-mono text-[11px]">${c.lastContactDate}</td>
+            <td class="py-3 px-4 text-right space-x-2">
+              <button onclick="openDetailModal('${c.id}')" class="text-indigo-400 hover:text-indigo-300 font-semibold text-xs">View Drawer</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    /* ==========================================================================
+       TEMPLATE QUICK-LAUNCHER ENGINE
+       ========================================================================== */
+
+    function selectTemplate(key) {
+      selectedTemplateKey = key;
+      document.querySelectorAll('.tmpl-select-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-500/50', 'bg-indigo-500/10');
+        btn.classList.add('border-slate-800', 'bg-slate-900/60');
+      });
+
+      const activeBtn = document.getElementById(`tmpl-btn-${key}`);
+      if (activeBtn) {
+        activeBtn.classList.add('border-indigo-500/50', 'bg-indigo-500/10');
+        activeBtn.classList.remove('border-slate-800', 'bg-slate-900/60');
+      }
+
+      const tmpl = TEMPLATES[key];
+      document.getElementById('template-title').innerText = tmpl.title;
+      document.getElementById('template-desc').innerText = tmpl.desc;
+
+      updateTemplatePreview();
+    }
+
+    function updateTemplatePreview() {
+      const name = document.getElementById('tmpl-var-name').value || '[Name]';
+      const company = document.getElementById('tmpl-var-company').value || '[Company]';
+      const topic = document.getElementById('tmpl-var-topic').value || '[Topic]';
+
+      const tmpl = TEMPLATES[selectedTemplateKey];
+      let body = tmpl.body
+        .replace(/{NAME}/g, name)
+        .replace(/{COMPANY}/g, company)
+        .replace(/{TOPIC}/g, topic);
+
+      document.getElementById('template-output').value = body;
+    }
+
+    function launchTemplateForContact(contactId, templateKey) {
+      const contact = contacts.find(c => c.id === contactId);
+      if (!contact) return;
+
+      switchTab('templates');
+      selectTemplate(templateKey);
+
+      document.getElementById('tmpl-var-name').value = contact.name;
+      document.getElementById('tmpl-var-company').value = contact.company;
+      document.getElementById('tmpl-var-topic').value = contact.notes ? contact.notes.substring(0, 30) : 'scaling models';
+
+      updateTemplatePreview();
+    }
+
+    function copyGeneratedTemplate() {
+      const text = document.getElementById('template-output').value;
+      
+      // Iframe safe clipboard copy fallback
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast('Template copied to clipboard!', 'success');
+      } catch (err) {
+        showToast('Failed to copy', 'error');
+      }
+      document.body.removeChild(textarea);
+    }
+
+    /* ==========================================================================
+       CONTACT MODAL & DETAIL DRAWER HANDLERS
+       ========================================================================== */
+
+    function openContactModal(contactId = null) {
+      const modal = document.getElementById('contact-modal');
+      const title = document.getElementById('contact-modal-title');
+      const form = document.getElementById('contact-form');
+      form.reset();
+
+      if (contactId) {
+        const contact = contacts.find(c => c.id === contactId);
+        title.innerText = "Edit Contact";
+        document.getElementById('form-contact-id').value = contact.id;
+        document.getElementById('form-name').value = contact.name;
+        document.getElementById('form-company').value = contact.company;
+        document.getElementById('form-role').value = contact.role;
+        document.getElementById('form-linkedin').value = contact.linkedin;
+        document.getElementById('form-stage').value = contact.stage;
+        document.getElementById('form-source').value = contact.source;
+        document.getElementById('form-notes').value = contact.notes;
+      } else {
+        title.innerText = "Add Target Contact";
+        document.getElementById('form-contact-id').value = '';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeContactModal() {
+      document.getElementById('contact-modal').classList.add('hidden');
+    }
+
+    function handleSaveContact(e) {
+      e.preventDefault();
+      const id = document.getElementById('form-contact-id').value;
+      const name = document.getElementById('form-name').value;
+      const company = document.getElementById('form-company').value;
+      const role = document.getElementById('form-role').value;
+      const linkedin = document.getElementById('form-linkedin').value;
+      const stage = document.getElementById('form-stage').value;
+      const source = document.getElementById('form-source').value;
+      const notes = document.getElementById('form-notes').value;
+
+      if (id) {
+        // Edit existing
+        const contact = contacts.find(c => c.id === id);
+        if (contact) {
+          contact.name = name;
+          contact.company = company;
+          contact.role = role;
+          contact.linkedin = linkedin;
+          contact.stage = stage;
+          contact.source = source;
+          contact.notes = notes;
+        }
+      } else {
+        // Create new
+        const newContact = {
+          id: 'c_' + Date.now(),
+          name,
+          company,
+          role,
+          linkedin,
+          stage,
+          source,
+          lastContactDate: getRelativeDate(0),
+          notes,
+          logs: [
+            { type: 'INITIAL_OUTREACH', date: getRelativeDate(0), summary: 'Added contact to tracking pipeline.' }
+          ]
+        };
+        contacts.unshift(newContact);
+      }
+
+      saveContacts();
+      closeContactModal();
+      showToast('Saved contact successfully!', 'success');
+    }
+
+    function openDetailModal(contactId) {
+      activeDetailContactId = contactId;
+      const contact = contacts.find(c => c.id === contactId);
+      if (!contact) return;
+
+      document.getElementById('detail-name').innerText = contact.name;
+      document.getElementById('detail-role-company').innerText = `${contact.role} @ ${contact.company}`;
+      document.getElementById('detail-linkedin').href = contact.linkedin || '#';
+      document.getElementById('detail-source').innerText = contact.source;
+      document.getElementById('detail-last-contact').innerText = contact.lastContactDate;
+      document.getElementById('detail-notes').innerText = contact.notes || 'No research notes recorded yet.';
+      document.getElementById('detail-stage-select').value = contact.stage;
+
+      // Render Stage Badge
+      document.getElementById('detail-stage-badge').innerHTML = `
+        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-indigo-300 border border-slate-700">
+          ${contact.stage.replace('_', ' ')}
+        </span>
+      `;
+
+      // Render 3B7 Engine status
+      const status3b7 = get3B7Status(contact);
+      document.getElementById('detail-3b7-status').innerHTML = `
+        <span class="text-[11px] font-semibold px-2 py-0.5 rounded border ${status3b7.bg} ${status3b7.color}">
+          ${status3b7.label}
+        </span>
+      `;
+
+      // Render Interaction Timeline Logs
+      renderDetailLogs(contact);
+
+      document.getElementById('detail-modal').classList.remove('hidden');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detail-modal').classList.add('hidden');
+      document.getElementById('log-form-container').classList.add('hidden');
+    }
+
+    function editCurrentContact() {
+      if (activeDetailContactId) {
+        closeDetailModal();
+        openContactModal(activeDetailContactId);
+      }
+    }
+
+    function updateContactStageFromModal() {
+      const newStage = document.getElementById('detail-stage-select').value;
+      const contact = contacts.find(c => c.id === activeDetailContactId);
+      if (contact) {
+        contact.stage = newStage;
+        contact.lastContactDate = getRelativeDate(0);
+        saveContacts();
+        openDetailModal(contact.id);
+        showToast(`Stage updated to ${newStage}`, 'info');
+      }
+    }
+
+    function renderDetailLogs(contact) {
+      const logsTimeline = document.getElementById('detail-logs-timeline');
+      logsTimeline.innerHTML = '';
+
+      if (!contact.logs || contact.logs.length === 0) {
+        logsTimeline.innerHTML = `<p class="text-slate-500 italic text-[11px]">No activity logged yet.</p>`;
+        return;
+      }
+
+      contact.logs.forEach(log => {
+        logsTimeline.innerHTML += `
+          <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-800 text-[11px] space-y-1">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-indigo-300">${log.type.replace('_', ' ')}</span>
+              <span class="text-slate-500 font-mono text-[10px]">${log.date}</span>
+            </div>
+            <p class="text-slate-300">${log.summary}</p>
+          </div>
+        `;
+      });
+    }
+
+    function toggleLogForm() {
+      const container = document.getElementById('log-form-container');
+      container.classList.toggle('hidden');
+      document.getElementById('log-date').value = getRelativeDate(0);
+    }
+
+    function saveInteractionLog() {
+      const contact = contacts.find(c => c.id === activeDetailContactId);
+      if (!contact) return;
+
+      const type = document.getElementById('log-type').value;
+      const date = document.getElementById('log-date').value || getRelativeDate(0);
+      const summary = document.getElementById('log-content').value;
+
+      if (!summary) {
+        showToast('Please enter log summary', 'error');
+        return;
+      }
+
+      if (!contact.logs) contact.logs = [];
+      contact.logs.unshift({ type, date, summary });
+      contact.lastContactDate = date;
+
+      saveContacts();
+      openDetailModal(contact.id);
+      toggleLogForm();
+      showToast('Activity log recorded', 'success');
+    }
+
+    /* ==========================================================================
+       VELOCITY CHART VISUALIZER (CHART.JS)
+       ========================================================================== */
+
+    function initVelocityChart() {
+      const ctx = document.getElementById('velocityChart')?.getContext('2d');
+      if (!ctx) return;
+
+      velocityChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4', 'Current Wk'],
+          datasets: [
+            {
+              label: 'Outreach Sent',
+              data: [3, 4, 5, 2, 4],
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99, 102, 241, 0.1)',
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: 'Interviews Booked',
+              data: [1, 1, 2, 0, 2],
+              borderColor: '#10b981',
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              borderDash: [4, 4],
+              tension: 0.3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { size: 10 } }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#64748b', font: { size: 10 } },
+              grid: { color: 'rgba(255, 255, 255, 0.05)' }
+            },
+            y: {
+              ticks: { color: '#64748b', font: { size: 10 } },
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    /* ==========================================================================
+       TOAST NOTIFICATION ENGINE
+       ========================================================================== */
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      const typeStyles = {
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        error: 'bg-rose-600 text-white border-rose-500',
+        info: 'bg-indigo-600 text-white border-indigo-500'
+      };
+
+      toast.className = `px-4 py-2.5 rounded-xl border text-xs font-semibold shadow-xl transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto flex items-center space-x-2 ${typeStyles[type] || typeStyles.info}`;
+      toast.innerHTML = `
+        <i class="fa-solid fa-circle-info"></i>
+        <span>${message}</span>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
